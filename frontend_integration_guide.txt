@@ -1,0 +1,56 @@
+FRONTEND INTEGRATION: PENDING APPROVALS
+=========================================
+
+To display pending approval requests in the Admin Dashboard, your frontend (React) needs to make the following API calls:
+
+1. FETCH PENDING APPROVALS
+   -----------------------
+   Endpoint: GET /api/admin/approvals?status=PENDING
+   URL: http://localhost:8080/api/admin/approvals?status=PENDING
+   
+   What it returns: A JSON array of 'Approval' objects.
+   
+   Example Response Data:
+   [
+     {
+       "id": 101,
+       "status": "PENDING",
+       "visitorName": "John Doe",
+       "requestDate": "2023-10-27T10:30:00",
+       "visitor": {
+         "id": 50,
+         "name": "John Doe",
+         "email": "john@example.com",
+         "phone": "1234567890",
+         "visitorType": "GUEST",
+         "imagePath": "..." 
+       },
+       "host": {
+         "id": 5,
+         "name": "Jane Smith",
+         "department": "IT"
+       }
+     },
+     ...
+   ]
+
+   How to Display:
+   - Loop through this array.
+   - Display `visitorName`, `visitor.email`, `visitor.phone`, `host.name`, and `requestDate`.
+   - Show "Approve" and "Reject" buttons for each item.
+
+2. APPROVE A REQUEST
+   -----------------
+   Endpoint: PATCH /api/approvals/{id}/approve
+   URL: http://localhost:8080/api/approvals/101/approve
+   
+   Action: Call this when the user clicks "Approve".
+   On Success: Remove the item from the list or refresh the list.
+
+3. REJECT A REQUEST
+   ----------------
+   Endpoint: PATCH /api/approvals/{id}/reject
+   URL: http://localhost:8080/api/approvals/101/reject
+   
+   Action: Call this when the user clicks "Reject".
+   On Success: Remove the item from the list or refresh the list.

@@ -1,0 +1,24 @@
+You are an expert frontend developer. I need you to update my React component to match a specific design.
+
+**Context:**
+- Project: Visitor Management System
+- Tech Stack: React, [Insert CSS Framework if any, e.g., Tailwind, Bootstrap, or plain CSS]
+
+**Task:**
+Update the following component code to visually match the provided design/layout.
+
+**Input Code:**
+[PASTE YOUR CURRENT COMPONENT CODE HERE, e.g., VirtualVisitorPass.jsx]
+
+**Desired Design:**
+[DESCRIBE THE DESIGN OR REFERENCE THE UPLOADED IMAGE]
+- Layout: Two-column layout (Details on left, Photo/QR on right).
+- Typography: Bold title "VISITOR PASS", clear labels and values.
+- Styling: Clean, professional look, similar to a printed ID card.
+
+**Requirements:**
+1. Match the layout structure exactly.
+2. Ensure all fields (Name, Contact, Email, ID Proof, Host, Type, Check-In) are displayed.
+3. Handle missing data gracefully (e.g., "N/A").
+4. Ensure the photo and QR code are properly sized and positioned.
+5. Provide the complete updated code.

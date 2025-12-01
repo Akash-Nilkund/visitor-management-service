@@ -1,0 +1,30 @@
+VISITOR TYPE ERROR FIX
+======================
+
+The error "Cannot deserialize value of type ... from String 'Interviewee'" happens because your backend `VisitorType` enum does not contain `INTERVIEWEE`.
+
+The frontend is sending "Interviewee", but the backend only knows: [GUEST, CONTRACTOR, VENDOR, VIP, DELEGATE].
+
+SOLUTION
+--------
+Update your `VisitorType.java` file to include `INTERVIEWEE` and any other types you want to support.
+
+**File Path:** `src/main/java/com/vms/backend/entity/VisitorType.java`
+
+**Updated Code:**
+
+```java
+package com.vms.backend.entity;
+
+public enum VisitorType {
+    CONTRACTOR,
+    VENDOR,
+    VIP,
+    DELEGATE,
+    GUEST,
+    INTERVIEWEE  // <--- Added this
+}
+```
+
+**Note:**
+If your frontend has other types in the dropdown (like "Family", "Delivery", etc.), you MUST add them to this list as well, or you will get the same error for those types.

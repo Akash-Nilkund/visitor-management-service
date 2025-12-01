@@ -1,0 +1,33 @@
+You need to update the `SecurityConsole.jsx` component in the frontend to implement the Visitor Check-Out functionality.
+
+Here are the specific requirements:
+
+1.  **Fetch Active Visitors**:
+    *   On component mount, fetch the list of active (checked-in) visitors from the backend API endpoint: `GET /api/admin/active-visitors`.
+    *   Display a loading state while fetching.
+
+2.  **Display Visitors Table**:
+    *   Render a table with the following columns:
+        *   **Visitor**: Show the visitor's photo (from `imagePath`), name, and type.
+        *   **Host & Company**: Show the host's name and company name.
+        *   **Check-In Time**: Display the `inTime` formatted nicely.
+        *   **Status**: Display a badge showing "Checked In".
+        *   **Action**: A column for the "Check Out" button.
+
+3.  **Implement Check-Out Action**:
+    *   Add a "Check Out" button for each visitor.
+    *   When clicked, confirm the action with the user.
+    *   If confirmed, make a `PATCH` request to `/api/visitors/{id}/checkout`.
+    *   On success, show a success message and refresh the list of active visitors to remove the checked-out visitor.
+
+4.  **Styling**:
+    *   Use Tailwind CSS for styling to match the existing design (clean, modern UI).
+    *   Ensure the layout is responsive.
+
+5.  **API Integration**:
+    *   Use the existing `api.js` or `axios` instance to make requests.
+    *   Ensure the image URL is correctly constructed (e.g., `http://localhost:8080/visitor-photos/...`).
+
+Reference the backend endpoints:
+*   `GET http://localhost:8080/api/admin/active-visitors`
+*   `PATCH http://localhost:8080/api/visitors/{id}/checkout`

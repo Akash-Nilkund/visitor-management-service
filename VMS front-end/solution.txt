@@ -1,0 +1,42 @@
+ANALYSIS AND SOLUTION
+
+The issue is NOT in the frontend. The frontend correctly sends a request to approve/check-in ONLY the specific visitor you clicked (e.g., "nayan").
+
+The fact that "Akash Nilkund" appears with the **exact same timestamp** (e.g., 11:29 PM) as the new visitor strongly indicates a **Backend Logic Issue**.
+
+**DIAGNOSIS:**
+It is highly likely that your Backend Code (Spring Boot) has one of the following issues:
+
+1.  **Hardcoded "Demo" Logic:**
+    There might be code in your `VisitorService.java` or `VisitorController.java` that automatically checks in a test user ("Akash Nilkund") whenever *any* visitor is checked in. This is often done during development to populate the dashboard and forgotten.
+
+2.  **"Approve All" Bug:**
+    The API endpoint for approval might be accidentally fetching *all* pending (or history) records and checking them in, instead of just the one matching the `id`.
+
+3.  **Database Trigger:**
+    Less likely, but there could be a database trigger creating this record.
+
+**SOLUTION (Check your Backend Code):**
+
+1.  Open `src/main/java/com/vms/backend/service/VisitorService.java` (or similar).
+2.  Find the `approveVisitor` and `checkInVisitor` methods.
+3.  **Look for any code that creates a new Visitor object or saves a hardcoded name like "Akash Nilkund".**
+4.  **Look for loops:** Ensure the code only acts on the `visitorRepository.findById(id)`, and does NOT do `visitorRepository.findAll()`.
+
+**Example of BAD Code to look for:**
+```java
+public void checkInVisitor(Long id) {
+    // ... logic for id ...
+    
+    // BAD: This creates a ghost visitor every time!
+    createDummyVisitor("Akash Nilkund"); 
+}
+```
+
+**Frontend Verification:**
+The frontend code in `PendingApprovalsTable.jsx` is clean:
+```javascript
+await visitorService.approveVisitor(id);
+await visitorService.checkInVisitor(id);
+```
+It strictly acts on the `id` of the row you clicked. It cannot magically add "Akash Nilkund" unless the backend does it.

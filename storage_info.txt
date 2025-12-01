@@ -1,0 +1,25 @@
+APPROVAL REQUEST STORAGE
+========================
+
+All approval requests are stored in your MySQL database.
+
+1. Database Table: `approval`
+   - This table is automatically created/updated by Hibernate based on the `Approval` entity class.
+
+2. Entity Class: `com.vms.backend.entity.Approval`
+   - Maps to the `approval` table.
+
+3. Stored Fields:
+   - `id`: Unique ID of the request.
+   - `visitor_id`: Foreign key linking to the `visitor` table (the person visiting).
+   - `host_id`: Foreign key linking to the `host` table (who they are visiting).
+   - `company_id`: Foreign key linking to the `company` table.
+   - `status`: Current state (PENDING, APPROVED, REJECTED, CHECKED_IN, CHECKED_OUT).
+   - `visitor_name`: A copy of the visitor's name for easier querying.
+   - `request_date`: When the request was made.
+   - `in_time`: When the visitor checked in.
+   - `out_time`: When the visitor checked out.
+
+4. Data Flow:
+   - When a visitor pre-registers (`POST /api/visitors/register`), a new row is inserted into the `approval` table with status 'PENDING'.
+   - When a host approves (`PATCH /api/approvals/{id}/approve`), the status of that row is updated to 'APPROVED'.

@@ -1,0 +1,23 @@
+Analysis of Ghost Visitor Bug
+
+1. Hardcoded Data ("Akash Nilkund"):
+   - I searched the entire codebase for "Akash" and "Nilkund".
+   - **Finding:** The name "Akash Nilkund" was found ONLY in `src/test/java/com/vms/backend/service/PdfServiceTest.java`.
+   - **Implication:** This is test data. If your application is connecting to the same database as your tests, or if you ran this test, it might have inserted this record into your database. It is NOT hardcoded in the main `VisitorService.java` or `VisitorController.java` logic.
+
+2. Incorrect Logic (findAll usage):
+   - **Finding:** In `src/main/java/com/vms/backend/service/VisitorService.java`, the method `checkInApprovedVisitor` (lines 211-242) fetches ALL approvals using `approvalRepository.findAll()` (Line 221).
+   - **Issue:** It then filters them in memory using Java Streams. This is highly inefficient and dangerous for performance as the database grows. It should be replaced with a database query like `approvalRepository.findByVisitorId(visitorId)`.
+   - **Relevance to Bug:** While this is bad logic, it filters by `visitorId`, so it shouldn't inherently create a *duplicate* visitor unless the logic inside the stream is picking up the wrong record (e.g. if multiple approvals exist and it picks the wrong one).
+
+3. Side Effects:
+   - I reviewed `approveVisit` and `checkInApprovedVisitor` in `VisitorService.java`.
+   - **Finding:** These methods do NOT contain any code that explicitly creates a `new Visitor()`. They only update existing `Approval` records.
+   - **Hypothesis:** The "Ghost Visitor" creation might be happening if:
+     a) The frontend is calling the `POST /register` or `POST /checkin` endpoint (which *does* create a new visitor) instead of the `PATCH` endpoint.
+     b) The test data from `PdfServiceTest.java` was persisted to your database.
+
+Recommendation:
+- Fix the `findAll()` usage in `VisitorService.java`.
+- Check your database for existing records created by the test.
+- Verify that the frontend is calling the correct `PATCH` endpoints for approval/check-in, not `POST`.

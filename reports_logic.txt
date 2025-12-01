@@ -1,0 +1,61 @@
+REPORTS & HISTORY STORAGE
+=========================
+
+1. STORAGE LOCATION
+   ----------------
+   Approved and Rejected requests are NOT moved to a different table. They remain in the `approval` table.
+   
+   - The `status` field simply changes:
+     - "PENDING"  -> "APPROVED"
+     - "PENDING"  -> "REJECTED"
+   
+   This means the `approval` table acts as the single source of truth for both active requests and historical logs.
+
+2. HOW TO DISPLAY IN REPORTS SECTION
+   ---------------------------------
+   To show the history (Reports) in the Admin Dashboard, use the history endpoint.
+
+   Endpoint: GET /api/admin/history
+   URL: http://localhost:8080/api/admin/history
+   
+   What it returns:
+   - A list of ALL approvals, sorted by date (newest first).
+   - Includes PENDING, APPROVED, REJECTED, CHECKED_IN, CHECKED_OUT.
+
+3. FRONTEND LOGIC
+   --------------
+   - Fetch the data from `GET /api/admin/history`.
+   - In your "Reports" or "History" table, you can filter this data on the client side (e.g., show only "APPROVED" or "REJECTED") or display everything.
+   - Columns to display:
+     - Visitor Name
+     - Company Name
+     - Host Name
+     - Status (The most important column)
+     - In Time / Out Time
+     - Request Date
+
+4. CHECK-IN FORM DROPDOWNS
+   -----------------------
+   The "Select Host" and "Select Company" dropdowns in the Visitor Check-In Form are connected to the database tables shown in your screenshot.
+
+   - **Select Company**: Fetches data from the `company` table via `GET /api/companies`.
+   - **Select Host**: Fetches data from the `host` table via `GET /api/hosts`.
+   
+   This ensures that the dropdowns always show the real-time data stored in your MySQL database.
+
+5. PROBLEM & SOLUTION: DROPDOWNS NOT LOADING
+   -----------------------------------------
+   **Problem:**
+   The dropdowns were empty because the backend was blocking access to the `/api/companies` and `/api/hosts` endpoints.
+   - Error 400/500/403 in Console: The security configuration treated these as "protected" endpoints, requiring a login token.
+   - Since the Visitor Check-In page is public (no login required), the requests failed.
+
+   **Solution:**
+   I have updated `SecurityConfig.java` to explicitly allow public access to these endpoints.
+   
+   **Code Change in `SecurityConfig.java`:**
+   ```java
+   .requestMatchers("/auth/**", "/api/visitors/**", "/api/companies/**", "/api/hosts/**").permitAll()
+   ```
+   
+   Now, the frontend can successfully fetch the list of companies and hosts without needing to be logged in.

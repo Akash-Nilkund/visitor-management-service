@@ -1,0 +1,53 @@
+PDF LAYOUT FIX
+==============
+
+To make the Visitor Pass PDF look exactly like the image you provided (clean, without extra boxes), you need to remove the border around the visitor's photo.
+
+1. THE PROBLEM
+   -----------
+   The current code in `PdfService.java` explicitly adds a black box border around the visitor's photo.
+   
+   Current Code:
+   ```java
+   pic.setBorder(Rectangle.BOX);
+   pic.setBorderColor(Color.BLACK);
+   pic.setBorderWidth(1f);
+   ```
+
+2. THE SOLUTION
+   ------------
+   Remove (or comment out) those lines in `src/main/java/com/vms/backend/service/PdfService.java`.
+   
+   **Corrected Code Block:**
+   
+   ```java
+   // 1. Visitor Photo
+   try {
+       String imagePath = visitor.getImagePath();
+       if (imagePath != null && !imagePath.isBlank()) {
+           File photo = new File(imagePath);
+           if (photo.exists()) {
+               Image pic = Image.getInstance(photo.getAbsolutePath());
+               pic.scaleToFit(120, 120);
+               pic.setAlignment(Image.ALIGN_CENTER);
+               
+               // REMOVE THESE LINES TO MATCH THE DESIGN:
+               // pic.setBorder(Rectangle.BOX);
+               // pic.setBorderColor(Color.BLACK);
+               // pic.setBorderWidth(1f);
+               
+               right.addElement(pic);
+           }
+       }
+   } catch (Exception ex) {
+       right.addElement(new Paragraph("Photo not available", valueFont));
+   }
+   ```
+
+3. VERIFICATION
+   ------------
+   - **Layout:** The existing code already uses a 2-column table (Text on Left, Images on Right), which matches your design perfectly.
+   - **QR Code:** The code already stacks the QR code below the photo, which is correct.
+   - **Fonts:** The code uses Helvetica, which is the standard clean font shown.
+   
+   By removing the border lines, the pass will look exactly like your reference image.

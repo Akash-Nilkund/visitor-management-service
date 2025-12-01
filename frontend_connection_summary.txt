@@ -1,0 +1,59 @@
+FRONTEND CONNECTION SUMMARY
+===========================
+
+This document outlines all the API connections required to update the Frontend to work with the new Backend logic.
+
+1. VISITOR REGISTRATION (Pre-Registration)
+   ---------------------------------------
+   - **Page**: Visitor Registration Form / Kiosk
+   - **Action**: When user submits the form.
+   - **Method**: POST
+   - **URL**: `/api/visitors/register`
+   - **Body**: `Multipart/form-data`
+     - `visitor`: JSON string (name, email, phone, hostId, etc.)
+     - `photo`: File object
+   - **Response**: Returns the created Approval object (status: PENDING).
+
+2. ADMIN DASHBOARD - PENDING APPROVALS
+   -----------------------------------
+   - **Page**: Admin Dashboard (Approvals Tab)
+   - **Action**: Load list of pending requests.
+   - **Method**: GET
+   - **URL**: `/api/admin/approvals?status=PENDING`
+   - **Response**: Array of Approval objects. Display `visitorName`, `host.name`, `requestDate`.
+
+3. ADMIN DASHBOARD - APPROVE / REJECT
+   ----------------------------------
+   - **Page**: Admin Dashboard (Approvals Tab)
+   - **Action**: Click "Approve" or "Reject" button.
+   - **Method**: PATCH
+   - **URL**: 
+     - Approve: `/api/approvals/{approvalId}/approve`
+     - Reject:  `/api/approvals/{approvalId}/reject`
+   - **Response**: Updated Approval object. Remove item from list on success.
+
+4. SECURITY CHECK-IN
+   -----------------
+   - **Page**: Security Console / Guard View
+   - **Action**: When visitor arrives and guard clicks "Check In".
+   - **Method**: PATCH
+   - **URL**: `/api/visitors/{visitorId}/checkin`
+   - **Note**: Use the `visitorId` from the search result or list.
+   - **Response**: Updated Approval object (status: CHECKED_IN, inTime set).
+
+5. SECURITY CHECK-OUT
+   ------------------
+   - **Page**: Security Console / Guard View
+   - **Action**: When visitor leaves and guard clicks "Check Out".
+   - **Method**: PATCH
+   - **URL**: `/api/visitors/{visitorId}/checkout`
+   - **Response**: Updated Approval object (status: CHECKED_OUT, outTime set).
+
+6. REPORTS / HISTORY
+   -----------------
+   - **Page**: Reports Page
+   - **Action**: Load full visit history.
+   - **Method**: GET
+   - **URL**: `/api/admin/history`
+   - **Response**: Array of all Approval objects (past and present).
+   - **Display**: Show `visitorName`, `host.name`, `status`, `inTime`, `outTime`.

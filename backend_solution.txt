@@ -1,0 +1,72 @@
+# GHOST VISITOR ISSUE: DIAGNOSIS AND SOLUTION
+
+## 1. DIAGNOSIS
+I have thoroughly analyzed the backend code (`VisitorService`, `VisitorController`, `VisitorRepository`, `ApprovalRepository`, `BackendApplication`).
+
+**Findings:**
+1.  **No Hardcoded "Akash Nilkund" Visitor:** There is NO code in the Service or Controller layers that explicitly creates a visitor named "Akash Nilkund".
+2.  **Admin Host Found:** The ONLY place "Akash Nilkund" (specifically `akashnilkund19@gmail.com`) appears is in `src/main/java/com/vms/backend/BackendApplication.java`.
+    - This file contains a `CommandLineRunner` that creates/updates an **Admin Host** ("Super Admin") on every application startup.
+
+**Root Cause Candidates:**
+Since the code logic is clean, the issue is likely one of the following:
+1.  **Modified `BackendApplication.java`:** You might have modified the `CommandLineRunner` in your local version to create a *Visitor* or set the Admin Host's name to "Akash Nilkund", and this runner is executing unexpectedly (e.g., on hot reload).
+2.  **Database Trigger:** A database trigger might be automatically inserting a record into the `approval` or `visitor` table whenever a new record is inserted.
+3.  **Frontend/DTO Display Issue:** The "Ghost Visitor" might actually be the **Host** (Admin) being displayed in the Visitor column.
+    - In `VisitorService.java`, the `convertToHistoryDTO` method has logic to fallback to `host.getName()` if `visitorName` is missing. If the "Ghost" record has a null visitor name, it might show the Host's name.
+
+## 2. SOLUTION STEPS
+
+Please follow these steps in order to fix the issue.
+
+### STEP 1: Check `BackendApplication.java`
+Open `src/main/java/com/vms/backend/BackendApplication.java`.
+Look at the `CommandLineRunner` bean.
+**Check:**
+- Does it create a `Visitor` object? (It should only create a `Host`).
+- Does it set the name to "Akash Nilkund"?
+- **Action:** If it creates a visitor, REMOVE that code. It should only be for the Admin Host.
+
+### STEP 2: Check Database Triggers
+If you have access to your MySQL database (e.g., via Workbench or Command Line):
+**Run:**
+```sql
+SHOW TRIGGERS;
+```
+**Action:** If you see any triggers on `visitor` or `approval` tables that insert data, DROP them.
+
+### STEP 3: Add Logging to Trace the Source
+To definitively catch where this is coming from, add logging to `VisitorService.java`.
+
+**Modify `VisitorService.java`:**
+Add `System.out.println` or `logger.info` in `checkInVisitor` and `preRegisterVisitor`.
+
+```java
+// In checkInVisitor
+public Approval checkInVisitor(VisitorRequest request, MultipartFile photoFile) {
+    System.out.println("DEBUG: checkInVisitor called for: " + request.getName());
+    // ...
+}
+
+// In preRegisterVisitor
+public Approval preRegisterVisitor(VisitorRequest request, MultipartFile photoFile) {
+    System.out.println("DEBUG: preRegisterVisitor called for: " + request.getName());
+    // ...
+}
+```
+**Test:**
+1.  Restart the backend.
+2.  Check in a visitor (e.g., "nayan").
+3.  Check the console logs.
+    - If you see **two** logs (one for "nayan", one for "Akash Nilkund"), then the **Frontend** is sending two requests, or some other backend component is calling the service.
+    - If you see only **one** log (for "nayan") but two records appear in the DB, then it is a **Database Trigger** or a **Hidden Side Effect** (like an Aspect or Event Listener not in the main path).
+
+### STEP 4: Verify Frontend Payload
+Although you believe the frontend is clean, verify the Network tab in your browser Developer Tools (F12).
+1.  Click "Check In".
+2.  Look at the **Network** tab.
+3.  Count how many requests are sent to `/api/visitors/...` or `/api/approvals/...`.
+4.  If you see a request with payload containing "Akash Nilkund", the issue is in the Frontend.
+
+## 3. SUMMARY
+The backend code logic for `checkInVisitor` and `approveVisit` is correct and does not hardcode "Akash Nilkund". The most likely cause is a **Database Trigger** or a **Data Seeder** (`CommandLineRunner`) that has been modified locally.

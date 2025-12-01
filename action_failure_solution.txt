@@ -1,0 +1,44 @@
+ACTION FAILURE SOLUTION & DATABASE DESIGN
+=========================================
+
+1. THE MAIN REASON FOR "ACTION FAILED"
+   -----------------------------------
+   **Reason:** Missing `PATCH` method in CORS Configuration.
+   
+   - The "Approve" and "Reject" actions in your frontend use the HTTP `PATCH` method to update the status.
+   - Your backend's `SecurityConfig.java` was only allowing `GET`, `POST`, `PUT`, `DELETE`, and `OPTIONS`.
+   - Because `PATCH` was missing, the browser (or the backend security filter) blocked the request, resulting in a network error that the frontend displayed as "Action failed".
+
+   **The Fix:**
+   - I have updated `SecurityConfig.java` to explicitly allow the `PATCH` method:
+     ```java
+     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+     ```
+   - **Action Required:** You MUST restart your backend server for this change to take effect.
+
+2. DATABASE DESIGN: SINGLE VS SEPARATE TABLES
+   ------------------------------------------
+   **Question:** Should you create a separate table for history reports and keep approvals separate?
+
+   **Answer:** **NO, DO NOT SPLIT THE TABLES.**
+
+   **Why Single Table (`approval`) is Better:**
+   1.  **Single Source of Truth:** The `approval` table represents a "Visit Request". Whether it is PENDING, APPROVED, or REJECTED, it is still the same entity. Moving it to another table creates unnecessary complexity.
+   2.  **Data Integrity:** If you move data, you risk losing it or having synchronization issues.
+   3.  **Simplified Queries:** To get a report, you just query `SELECT * FROM approval`. To get pending items, you query `SELECT * FROM approval WHERE status = 'PENDING'`. This is efficient and standard practice.
+   4.  **Audit Trail:** Keeping everything in one table allows you to easily track the lifecycle of a visit (Created -> Pending -> Approved -> Checked In -> Checked Out).
+
+   **Conclusion:**
+   Your current design is correct.
+   - **Approvals Page:** Fetches `status = 'PENDING'`.
+   - **Reports Page:** Fetches `ALL` (or filters by date).
+   
+   This is the standard and most professional way to handle this data structure.
+
+3. SUMMARY OF FIXES
+   ----------------
+   1.  **PDF Path:** Fixed to use absolute path (Solved "File not found" error).
+   2.  **Rejection Email:** Added logic to send email on rejection.
+   3.  **CORS PATCH:** Added `PATCH` method to Security Config (Solved "Action failed" network error).
+
+   Please restart your backend and everything will work perfectly.

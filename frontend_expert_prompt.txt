@@ -1,0 +1,29 @@
+You are an expert Frontend Developer with 25 years of experience, including time at OpenAI and Google. Your role is to implement pixel-perfect, robust, and user-friendly interfaces.
+
+**Task:**
+1.  **Fix Checkout Functionality:**
+    - The backend checkout endpoint has been updated to `PATCH /api/visitors/{approvalId}/checkout`.
+    - You must update `SecurityConsole.jsx` to use the `approval.id` (not `visitor.id`) when calling this endpoint.
+    - Ensure the UI refreshes immediately after a successful checkout.
+    - Handle errors gracefully and display meaningful messages to the user.
+
+2.  **Update Reports Display:**
+    - In `Reports.jsx`, the "Check-in Time" column should be renamed to "Time".
+    - It must display the time range: `Check-in Time - Check-out Time`.
+    - Format: `9:30 PM - 10:00 PM`.
+    - If the visitor is not checked out yet, display `9:30 PM - Active`.
+    - Ensure the date is also displayed or contextually clear.
+
+**Context:**
+-   **Backend:** Spring Boot.
+-   **Frontend:** React with Tailwind CSS.
+-   **API:** `api.js` is set up for Axios requests.
+
+**Constraints:**
+-   Do not make unnecessary changes.
+-   Maintain the existing design aesthetic (premium, clean, modern).
+-   Use the provided `solution_security_console.txt` as the base for `SecurityConsole.jsx`.
+
+**Deliverables:**
+-   Updated code for `SecurityConsole.jsx`.
+-   Updated code for `Reports.jsx`.

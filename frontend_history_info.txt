@@ -1,0 +1,24 @@
+FRONTEND HISTORY SECTION
+========================
+
+YES, there is a history section in the frontend, typically referred to as "Reports".
+
+1. Component Name
+   --------------
+   Likely `Reports.jsx` (based on previous development context).
+
+2. Functionality
+   -------------
+   - It displays the list of past visits.
+   - It should be fetching data from the backend endpoint: `GET /api/admin/history`.
+   - It typically shows columns like:
+     - Visitor Name
+     - Host
+     - Company
+     - Status (APPROVED, REJECTED, CHECKED_IN, CHECKED_OUT)
+     - Time/Date
+
+3. Integration
+   -----------
+   - Ensure this component calls the `getHistory` API.
+   - It serves as the read-only view for all past and current visit records.

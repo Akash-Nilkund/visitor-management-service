@@ -1,0 +1,61 @@
+Connection Verification Report
+==============================
+
+1. Codebase Connection
+----------------------
+The connection between `Host` and `Company` has been established in the codebase as follows:
+
+- **Entity Level (`Host.java`)**:
+  A `@ManyToOne` relationship has been added to the `Host` entity, linking it to the `Company` entity via the `company_id` column in the database.
+  ```java
+  @ManyToOne
+  @JoinColumn(name = "company_id")
+  private Company company;
+  ```
+
+- **DTO Level (`HostDTO.java`)**:
+  A new `HostDTO` class has been created to expose the `companyId` field to the API consumers.
+  ```java
+  private Long companyId;
+  ```
+
+- **Service Level (`HostService.java`)**:
+  The `getAllHosts` method now converts `Host` entities to `HostDTO` objects. It explicitly maps the `company.id` from the entity to the `companyId` field in the DTO.
+  ```java
+  if (host.getCompany() != null) {
+      dto.setCompanyId(host.getCompany().getId());
+  }
+  ```
+
+- **API Level (`HostController.java`)**:
+  The `/api/hosts` endpoint now returns a list of `HostDTO` objects, ensuring the `companyId` is included in the JSON response.
+
+2. Database Connection (MySQL)
+------------------------------
+The code assumes that the `host` table in your MySQL database has a column named `company_id` that is a foreign key referencing the `id` column in the `company` table.
+
+**To verify this in your database:**
+You can run the following SQL query in your database client:
+```sql
+SELECT h.id, h.name, h.company_id, c.name as company_name 
+FROM host h 
+LEFT JOIN company c ON h.company_id = c.id;
+```
+If this query returns results with valid company names, the data connection is correct.
+
+3. API Response Verification
+----------------------------
+When you call `GET /api/hosts`, the response will now look like this:
+```json
+[
+  {
+    "id": 1,
+    "name": "Alice",
+    "email": "alice@example.com",
+    "companyId": 101,
+    ...
+  },
+  ...
+]
+```
+This confirms that the backend is correctly serving the linked data.

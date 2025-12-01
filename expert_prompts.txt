@@ -1,0 +1,65 @@
+EXPERT PROMPTS FOR VMS SOLUTION
+===============================
+
+Below are two distinct prompts designed by a Senior Prompt Engineer. You can use these to instruct an AI (like ChatGPT, Claude, or a Junior Developer) to implement the specific fixes we identified.
+
+--------------------------------------------------------------------------------
+PROMPT 1: BACKEND SOLUTION (Spring Boot)
+--------------------------------------------------------------------------------
+**Role:** Act as a Senior Backend Engineer with expertise in Spring Boot 3, Java 17, and iText PDF generation.
+
+**Context:** We are developing a Visitor Management System (VMS). We are facing issues with PDF generation paths, CORS configuration for PATCH requests, and specific PDF styling requirements.
+
+**Task:** Please refactor and fix the following three backend services. Ensure all changes are robust and production-ready.
+
+**Requirements:**
+
+1.  **Fix `PdfService.java` (PDF Generation & Layout):**
+    *   **Path Issue:** Change the output directory for generated PDFs. Instead of a relative path (`visitor-passes/`), use an **absolute path** derived from the parent of the configured `photoDir`. Ensure the directory is created if it doesn't exist.
+    *   **Layout Fix (Visual Match):** We need the PDF to look **exactly** like the provided design reference.
+        *   **Title:** "VISITOR PASS" centered at the top (Helvetica, Bold, size 20).
+        *   **Structure:** Use a 2-column layout (Text on Left, Images on Right) with **NO visible table borders**.
+        *   **Left Column:** Display details (Name, Contact, Email, ID Proof, Host, Type, Check-In). Labels should be **Bold**, values should be Normal.
+        *   **Right Column:**
+            *   **Photo:** Display the visitor's photo. **CRITICAL:** Do **NOT** add any border or box around the photo. It must be a clean image.
+            *   **QR Code:** Place the QR code directly below the photo, centered.
+        *   **Footer:** "Please display this pass at all times." (Italic, small).
+
+2.  **Fix `SecurityConfig.java` (CORS & Methods):**
+    *   **CORS Issue:** The frontend "Approve/Reject" actions are failing because the browser blocks the `PATCH` method.
+    *   **Action:** Update the `corsConfigurationSource` bean to explicitly add `"PATCH"` to the list of `setAllowedMethods` (along with GET, POST, PUT, DELETE, OPTIONS).
+    *   **Access Control:** Ensure `/api/companies/**` and `/api/hosts/**` are in the `permitAll()` list so the frontend dropdowns can load without authentication.
+
+3.  **Fix `VisitorService.java` (Workflow Logic):**
+    *   **Rejection Logic:** In the `rejectVisit(Long id)` method, after setting the status to "REJECTED" and saving, you MUST call `emailService.sendRejection(...)` to notify the visitor. Do not leave the visitor in the dark.
+
+**Output Format:**
+Provide the complete, corrected Java code for:
+1.  `PdfService.java`
+2.  `SecurityConfig.java`
+3.  `VisitorService.java`
+
+--------------------------------------------------------------------------------
+PROMPT 2: FRONTEND SOLUTION (React)
+--------------------------------------------------------------------------------
+**Role:** Act as a Senior Frontend Developer specializing in React, Axios, and Error Handling.
+
+**Context:** We are connecting a React frontend to a Spring Boot backend. We need to ensure the "Approve/Reject" workflow handles network responses correctly and that the UI reflects the backend state.
+
+**Task:** Review and optimize the `Approvals` component and `VisitorCheckInForm`.
+
+**Requirements:**
+
+1.  **Verify `Approvals.jsx` (Action Handling):**
+    *   Ensure the "Approve" (Tick) and "Reject" (Cross) buttons trigger an API call using the `PATCH` method (not POST or PUT).
+    *   **Error Handling:** Update the `catch` block. Instead of showing a generic "Action failed" toast, check if `error.response.data.message` exists and display the specific error message from the backend. This helps in debugging issues like "File not found" or "Email failed".
+    *   **State Update:** On success, remove the approved/rejected item from the list immediately to update the UI without a page refresh.
+
+2.  **Verify `VisitorCheckInForm.jsx` (Dropdowns):**
+    *   Ensure the component fetches data from the real endpoints: `/api/companies` and `/api/hosts`.
+    *   Handle the case where the list is empty by showing a "No companies found" placeholder or a retry button.
+
+**Output Format:**
+Provide the refined code snippets for:
+1.  The `handleApprove` and `handleReject` functions in `Approvals.jsx`.
+2.  The `useEffect` hook in `VisitorCheckInForm.jsx` responsible for fetching dropdown data.

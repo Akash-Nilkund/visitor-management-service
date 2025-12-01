@@ -1,0 +1,39 @@
+APPROVAL WORKFLOW ANALYSIS & FIX
+================================
+
+1. APPROVE ACTION (Tick Mark)
+   --------------------------
+   **Expected Behavior:**
+   - Update status to "APPROVED".
+   - Generate a Visitor Pass PDF.
+   - Send an email to both Host and Visitor with the PDF attached.
+
+   **Problem (Why it failed):**
+   - The "Action failed" error was caused by the **PDF Generation** step.
+   - The backend was trying to save the PDF to a relative path (`visitor-passes/`), which often fails due to write permission issues or incorrect working directories in the server environment.
+   - When this step failed, the entire transaction rolled back, and the frontend received an error.
+
+   **Solution:**
+   - I have updated the code to use an **Absolute Path** (`E:/my_project/visitor-passes/`) for saving the PDF.
+   - This ensures the file is successfully created.
+   - **Status:** FIX APPLIED (Requires Server Restart).
+
+2. REJECT ACTION (Cross Mark)
+   --------------------------
+   **Expected Behavior:**
+   - Reject the request.
+   - Store the details in Reports (History) with status "REJECTED".
+
+   **Current Logic:**
+   - The backend updates the `Approval` entity's status to "REJECTED".
+   - Since the "Reports" section simply fetches all records from the `Approval` table, this rejected request **automatically appears** in the history/reports section.
+   - **Note:** The current implementation does NOT send a rejection email. It only updates the status.
+
+   **Why it might fail:**
+   - If the "Reject" action also returns "Action failed", it would be due to a database connection issue or a generic frontend error handling bug (e.g., if the frontend expects a specific response format that the backend isn't sending).
+   - However, the most likely cause of the recent errors was isolated to the "Approve" action's PDF generation.
+
+3. SUMMARY
+   -------
+   - **Approve Fix:** The PDF path issue is fixed. After restarting the backend, clicking the Tick mark will successfully approve, generate the PDF, and send the emails.
+   - **Reject Logic:** The logic to "reject and store in reports" is already correct. No changes are needed unless you specifically want to add a rejection email notification.

@@ -1,0 +1,45 @@
+You are a Senior Frontend Engineer with expert-level proficiency in React, Axios, and REST API integration. Your task is to update the existing React frontend to fully integrate with the newly refactored Spring Boot backend.
+
+CONTEXT:
+The backend has been updated to separate 'Visitor' profiles from 'Approval' (Visit) records. The API endpoints have changed to reflect this lifecycle: Registration -> Pending Approval -> Approved -> Checked In -> Checked Out.
+
+YOUR OBJECTIVE:
+Update the frontend code (API services, components, and state management) to connect to the following new backend endpoints. Do NOT change the visual design or UI styling; focus strictly on logic and data integration.
+
+REQUIRED INTEGRATION UPDATES:
+
+1. VISITOR REGISTRATION
+   - Target Component: Visitor Registration Form / Kiosk
+   - Logic: Submit form data to `POST /api/visitors/register`.
+   - Payload: Use `FormData` to send `visitor` (JSON string) and `photo` (File).
+   - Expected Response: An `Approval` object with status 'PENDING'. Handle success/error states accordingly.
+
+2. ADMIN DASHBOARD - PENDING APPROVALS
+   - Target Component: Admin Dashboard (Approvals Tab)
+   - Logic: Fetch data from `GET /api/admin/approvals?status=PENDING`.
+   - Display: Map through the response array. Show `visitorName`, `host.name`, and `requestDate`.
+   - Actions:
+     - "Approve" button -> Call `PATCH /api/approvals/{id}/approve`.
+     - "Reject" button -> Call `PATCH /api/approvals/{id}/reject`.
+   - State Update: Remove the item from the list immediately upon success.
+
+3. SECURITY CONSOLE - CHECK-IN/OUT
+   - Target Component: Security Guard Console
+   - Logic:
+     - Check-In: Call `PATCH /api/visitors/{visitorId}/checkin`.
+     - Check-Out: Call `PATCH /api/visitors/{visitorId}/checkout`.
+   - Note: Ensure you are passing the correct ID (Visitor ID) as required by the endpoint.
+
+4. REPORTS / HISTORY
+   - Target Component: Reports / History Page
+   - Logic: Fetch data from `GET /api/admin/history`.
+   - Display: Show a table with Visitor Name, Host, Status (APPROVED, CHECKED_IN, etc.), In Time, and Out Time.
+
+CONSTRAINTS:
+- Maintain existing file structure.
+- Use the existing `api.js` or service layer for all HTTP calls.
+- Ensure robust error handling (e.g., show alerts on API failures).
+- Do not modify the backend code.
+
+OUTPUT:
+Provide the modified code for the relevant React components and API service files.

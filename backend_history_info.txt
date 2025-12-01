@@ -1,0 +1,19 @@
+BACKEND HISTORY SECTION
+=======================
+
+YES, there is a dedicated history section in the backend.
+
+1. Endpoint
+   --------
+   GET /api/admin/history
+
+2. Controller
+   ----------
+   File: src/main/java/com/vms/backend/controller/ApprovalController.java
+   Method: getHistory()
+
+3. Functionality
+   -------------
+   - It fetches ALL records from the `approval` table.
+   - It sorts them by `requestDate` in descending order (newest first).
+   - This serves as the "History" or "Reports" data source for the frontend.

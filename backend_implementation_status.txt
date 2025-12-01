@@ -1,0 +1,35 @@
+Backend Implementation Status
+=============================
+
+1. WebSocket Configuration
+   - File: config/WebSocketConfig.java
+   - Status: Implemented. Enabled simple broker on "/dashboard" and registered "/ws" endpoint.
+
+2. Visitor Repository Updates
+   - File: repository/VisitorRepository.java
+   - Status: Implemented. Added custom queries:
+     - countActiveVisitors()
+     - countVisitorsToday()
+     - countVisitorsByStatus()
+     - countVisitorsByHourToday()
+
+3. Report Service (Aggregator)
+   - File: service/ReportService.java
+   - Status: Created. Aggregates data from VisitorRepository and ApprovalRepository.
+
+4. Updated Visitor Service
+   - File: service/VisitorService.java
+   - Status: Updated.
+     - Injected SimpMessagingTemplate and ReportService.
+     - Added broadcastDashboardUpdate() method.
+     - Called broadcastDashboardUpdate() in:
+       - checkInVisitor
+       - checkInApprovedVisitor
+       - approveVisit
+       - checkoutVisit
+
+5. Approval Repository Updates
+   - File: repository/ApprovalRepository.java
+   - Status: Updated. Added countByStatus(String status) method required by ReportService.
+
+All requested backend components have been implemented.

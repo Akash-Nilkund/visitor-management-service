@@ -1,0 +1,90 @@
+Here is the prompt you can use to fix your backend. It explains exactly what needs to be changed in your Spring Boot application to correctly save the Company ID when creating a Host.
+
+--- COPY FROM HERE ---
+
+I need to fix a bug in my Spring Boot backend where the `company_id` is being saved as NULL in the `host` table when I create a new Host.
+
+Here is the context:
+1.  **Frontend**: Sends a POST request to `/api/hosts` with a JSON body like:
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "phone": "1234567890",
+      "department": "Engineering",
+      "companyId": 5
+    }
+    ```
+2.  **Database**: I have a `host` table with a `company_id` column and a `company` table.
+
+Please make the following changes to my backend files:
+
+### 1. Update `HostDTO.java`
+Ensure the DTO class has a `companyId` field to capture the value sent from the frontend.
+
+```java
+// In your HostDTO class
+public class HostDTO {
+    // ... existing fields ...
+    
+    private Long companyId; // Add this field if missing
+
+    // Add Getter and Setter
+    public Long getCompanyId() { return companyId; }
+    public void setCompanyId(Long companyId) { this.companyId = companyId; }
+}
+```
+
+### 2. Update `Host.java` (Entity)
+Ensure the Host entity has the correct relationship mapping to the Company entity.
+
+```java
+// In your Host entity class
+@Entity
+public class Host {
+    // ... existing fields ...
+
+    @ManyToOne
+    @JoinColumn(name = "company_id") // This maps to the actual column in your DB
+    private Company company;
+
+    // Getter and Setter
+    public Company getCompany() { return company; }
+    public void setCompany(Company company) { this.company = company; }
+}
+```
+
+### 3. Update `HostService.java` (or HostServiceImpl.java)
+This is the most important part. When creating a host, you must fetch the Company by ID and set it on the Host entity.
+
+```java
+@Service
+public class HostService {
+
+    @Autowired
+    private HostRepository hostRepository;
+
+    @Autowired
+    private CompanyRepository companyRepository; // Inject CompanyRepository
+
+    public Host createHost(HostDTO hostDTO) {
+        Host host = new Host();
+        // ... map other fields like name, email, etc. ...
+        host.setName(hostDTO.getName());
+        host.setEmail(hostDTO.getEmail());
+        host.setPhone(hostDTO.getPhone());
+        host.setDepartment(hostDTO.getDepartment());
+
+        // FIX: Handle Company Mapping
+        if (hostDTO.getCompanyId() != null) {
+            Company company = companyRepository.findById(hostDTO.getCompanyId())
+                .orElseThrow(() -> new RuntimeException("Company not found with ID: " + hostDTO.getCompanyId()));
+            host.setCompany(company);
+        }
+
+        return hostRepository.save(host);
+    }
+}
+```
+
+Please apply these changes to ensure the `company_id` is correctly populated in the database.

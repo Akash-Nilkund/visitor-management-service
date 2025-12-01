@@ -1,0 +1,15 @@
+I am facing a "Ghost Visitor" bug where approving/checking in a visitor creates a duplicate visitor record.
+The backend developer has confirmed that the backend logic for `PATCH` endpoints is clean and does not create new records.
+
+**Suspected Cause:**
+The frontend might be calling `POST /api/visitors/register` or `POST /api/visitors/checkin` (which create new records) instead of the correct `PATCH` endpoints when an existing visitor is approved or checked in.
+
+**Task:**
+Please check the frontend code (likely in `VisitorManagement.jsx`, `VisitorApproval.jsx`, or similar components) for the "Approve" and "Check In" button handlers.
+
+**Requirements:**
+1.  **Verify Endpoints:** Ensure that for *existing* visitors (approvals), the code calls:
+    -   `PATCH /api/visitors/{id}/checkin` (for check-in)
+    -   `PATCH /api/approvals/{id}/approve` (for approval)
+2.  **Stop POST Calls:** Ensure it is NOT calling `POST /api/visitors/register` or `POST /api/visitors/checkin` in these scenarios.
+3.  **Fix Logic:** If it is calling `POST`, change it to `PATCH` and ensure the `id` is passed correctly in the URL.

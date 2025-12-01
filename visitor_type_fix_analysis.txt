@@ -1,0 +1,55 @@
+VISITOR TYPE PDF ISSUE ANALYSIS
+===============================
+
+YES/NO SUMMARY:
+----------------
+Is 'Guest' hardcoded as default in the Backend? NO
+Did we find a default option to remove in the Backend? NO
+Is the issue in the Backend? NO
+
+Problem:
+The visitor pass PDF always shows "Guest" as the visitor type, regardless of what is selected during check-in. The user also requested to remove the default "Guest" option if it exists.
+
+Findings:
+1. **PdfService.java**:
+   - The PDF generation logic (lines 86-87) correctly retrieves the visitor type from the `Visitor` entity:
+     `String vtype = visitor.getVisitorType() != null ? visitor.getVisitorType().toString() : "N/A";`
+   - It simply prints whatever is stored in the database.
+
+2. **VisitorService.java**:
+   - The `checkInVisitor` and `preRegisterVisitor` methods (lines 69, 127) correctly set the visitor type from the `VisitorRequest` object:
+     `visitor.setVisitorType(request.getVisitorType());`
+   - There is no logic in the backend that defaults the visitor type to "Guest" if it is missing or null.
+
+3. **VisitorType.java**:
+   - The Enum contains: `CONTRACTOR`, `VENDOR`, `VIP`, `DELEGATE`, `GUEST`, `INTERVIEW`.
+   - There is no "default" annotation here.
+
+4. **VisitorRequest.java**:
+   - No default value is assigned to the `visitorType` field.
+
+Conclusion:
+The backend is functioning correctly. It saves and prints exactly what it receives from the frontend.
+The issue is almost certainly in the **Frontend** application (React/Angular/Vue).
+Likely causes:
+- The "Visitor Type" dropdown in the Check-In form has "Guest" selected by default.
+- The dropdown options might all be accidentally sending the value "GUEST" (copy-paste error).
+- The frontend state initialization defaults to "GUEST" and doesn't update correctly when the user changes the selection.
+
+Recommendations:
+1. **Frontend Fix**:
+   - Locate the Check-In form in the frontend code.
+   - Check the `<select>` or dropdown component for `Visitor Type`.
+   - Ensure each option has the correct value (e.g., value="INTERVIEW" for Interview).
+   - Remove any `defaultChecked` or initial state set to "GUEST" if you want to force the user to make a selection.
+   - If you want no default, initialize the state to `null` or empty string, and add validation to ensure a type is selected before submission.
+
+2. **Backend Adjustment (Optional but not recommended)**:
+   - We could remove `GUEST` from the `VisitorType` enum, but this would cause errors if the frontend tries to send "GUEST". It is better to fix the source of the data (frontend).
+
+3. **Typo Check**:
+   - Ensure the frontend sends "INTERVIEW" (uppercase or matching enum) if the user selects "Interview". The existing `visitor_type_fix.txt` mentioned "Interviewee", but the current code has `INTERVIEW`. Ensure consistency.
+
+Action Taken:
+- This analysis has been generated as requested.
+- No backend code changes are required to fix the "Guest appearing every time" issue, as the backend is merely reflecting the data it receives.
